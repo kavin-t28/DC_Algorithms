@@ -7,11 +7,13 @@ import (
 	"time"
 )
 
+// BankAccount represents a bank account with an ID and balance.
 type BankAccount struct {
 	AccountID int
 	Balance   float64
 }
 
+// Process represents a process that performs transactions and takes snapshots.
 type Process struct {
 	ProcessID       int
 	Accounts        []BankAccount
@@ -20,13 +22,14 @@ type Process struct {
 	RandomGenerator *rand.Rand
 }
 
+// transaction simulates transactions between processes.
 func (p *Process) transaction(processes *[]Process, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	numTransactions := len(p.Accounts) * 15
 
 	for i := 0; i < numTransactions; i++ {
-		amount := float64(p.RandomGenerator.Intn(500)) // Random amount between 0 and 500
+		amount := float64(p.RandomGenerator.Intn(500)) // Generate a random amount between 0 and 500
 		recipientProcess := p.RandomGenerator.Intn(len(*processes))
 
 		p.ChannelStates[p.ProcessID] += amount      // Record outgoing amount
@@ -40,6 +43,7 @@ func (p *Process) transaction(processes *[]Process, wg *sync.WaitGroup) {
 	}
 }
 
+// takeSnapshot simulates the process of taking a snapshot of the accounts' balances.
 func (p *Process) takeSnapshot() {
 	fmt.Printf("Process %d is taking a snapshot.\n", p.ProcessID)
 
@@ -96,7 +100,7 @@ func main() {
 
 	waitGroup.Add(n)
 	for i := 0; i < n; i++ {
-		go processes[i].transaction(&processes, &waitGroup)
+		go processes[i].transaction(&processes, &waitGroup) // Start transactions concurrently
 	}
 	waitGroup.Wait()
 
